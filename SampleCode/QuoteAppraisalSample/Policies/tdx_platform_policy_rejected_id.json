@@ -10,8 +10,7 @@
                 "allow_dynamic_plaform": true,
                 "accepted_tcb_status": [
                     "UpToDate",
-                    "OutOfDate",
-                    "TDRelaunchAdvised"
+                    "OutOfDate"
                 ],
                 "rejected_advisory_ids": [ 
                     "INTEL-SA-00617" 

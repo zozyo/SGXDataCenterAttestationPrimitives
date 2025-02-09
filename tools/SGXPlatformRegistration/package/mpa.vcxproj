@@ -62,7 +62,6 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\include;..\common;..\uefi\inc;..\agent\inc;..\common\inc</AdditionalIncludeDirectories>
       <ControlFlowGuard>Guard</ControlFlowGuard>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

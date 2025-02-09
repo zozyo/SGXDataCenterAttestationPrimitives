@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2019 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,8 +30,11 @@
 #
 
 ######## SGX SDK Settings ########
-TOP_DIR = ../../..
+TOP_DIR  = ../../..
 include $(TOP_DIR)/buildenv.mk
+
+TDQE_WRAPPER_VER:= $(shell awk '$$2 ~ /TDQE_WRAPPER_VERSION/ { print substr($$3, 2, length($$3) - 2); }' \
+	$(COMMON_DIR)/inc/internal/se_version.h)
 
 PCE_Library_Dir := $(TOP_DIR)/pce_wrapper/linux
 PCE_Library := $(PCE_Library_Dir)/libsgx_pce_logic.so
@@ -69,22 +72,17 @@ Quote_Cpp_Objects := $(Quote_Cpp_Files:.cpp=.o)
 Quote_Cpp_Depends := $(Quote_Cpp_Files:.cpp=.d)
 
 Quote_Name := libsgx_tdx_logic.so
-Quote_Full := $(Quote_Name).$(call get_full_version,TDQE_WRAPPER_VERSION)
-Quote_Major := $(Quote_Name).$(call get_major_version,TDQE_WRAPPER_VERSION)
+Quote_Soname := $(Quote_Name).$(call SPLIT_VERSION,$(TDQE_WRAPPER_VER),1)
 
 -include $(Quote_C_Depends)
 -include $(Quote_Cpp_Depends)
 
 .PHONY: all
-all: install_lib
+all:  install_lib
 
 install_lib: $(Quote_Name) | $(BUILD_DIR)
-	@$(CP) $(Quote_Name) $|/$(Quote_Full)
-	@$(LN) $(Quote_Full) $|/$(Quote_Major)
-	@$(LN) $(Quote_Major) $|/$(Quote_Name)
-
-$(BUILD_DIR):
-	@$(MKDIR) $@
+	@$(CP) $(Quote_Name) $|
+	@ln -fs $(Quote_Name) $(BUILD_DIR)/$(Quote_Soname)
 
 ######## Quote Objects ########
 
@@ -106,7 +104,7 @@ $(Quote_Cpp_Objects): %.o: %.cpp
 
 $(Quote_Name): $(Quote_C_Objects) $(Quote_Cpp_Objects) $(PCE_Library)
 	$(CXX) $(Quote_C_Objects) $(Quote_Cpp_Objects) -shared $(Quote_Link_Flags) \
-	       -Wl,-soname=$(Quote_Major) -o $@
+	       -Wl,-soname=$(Quote_Soname) -o $@
 	@echo "LINK =>  $@"
 
 $(PCE_Library): force_look
@@ -124,9 +122,8 @@ force_look:
 .PHONY: clean
 
 clean:
-	@$(RM) .config_* $(Quote_Name) $(Quote_C_Objects) $(Quote_Cpp_Objects) \
-	    $(Quote_C_Depends) $(Quote_Cpp_Depends) tdqe_u.* id_enclave_u.*    \
-	    $(addprefix $(BUILD_DIR)/,$(Quote_Name) $(Quote_Full) $(Quote_Major))
+	@rm -f .config_* $(Quote_Name)  $(Quote_C_Objects) $(Quote_Cpp_Objects) \
+	    $(Quote_C_Depends) $(Quote_Cpp_Depends) tdqe_u.* id_enclave_u.*
 	@make -C $(PCE_Library_Dir) clean
 	@make -C $(TDQE_Dir) clean
 	@make -C $(ID_ENCLAVE_Dir) clean

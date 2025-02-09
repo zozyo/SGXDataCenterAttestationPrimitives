@@ -70,10 +70,6 @@ CPP_OBJS := $(CPP_SRCS:.cpp=.o)
 CPP_DEPS := $(CPP_OBJS:%.o=%.d)
 
 LDFLAGS := $(COMMON_LDFLAGS)
-ifeq ($(STANDALONE), 1)
-	LDFLAGS += '-Wl,-rpath,$$ORIGIN'
-	CXXFLAGS += '-DSTANDALONE'
-endif
 
 .PHONY: clean all
 all: $(LIBS_MPA) $(CPP_OBJS)

@@ -23,6 +23,3 @@
 /QuoteGeneration/build/
 **/Debug/
 **/Release/
-
-#prebuilt binaries
-/prebuilt/
